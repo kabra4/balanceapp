@@ -2,6 +2,7 @@ import express from "express";
 import { User } from "./models/User";
 import { up } from "./migration";
 import sequelize from "./models";
+import { Op } from "sequelize";
 
 const app = express();
 app.use(express.json());
@@ -10,27 +11,31 @@ app.post("/user/:id/balance", async (req, res) => {
 	const { id } = req.params;
 	const { amount } = req.body;
 
-	const transaction = await sequelize.transaction();
 	try {
-		let user = await User.findByPk(id, { transaction });
-		if (user && user.balance + amount >= 0) {
-			user.balance += amount;
-			await user.save({ transaction });
-			await transaction.commit();
-			res.send(user);
+		// Perform a conditional update directly
+		const result = await User.update(
+			{ balance: sequelize.literal(`balance + ${amount}`) },
+			{
+				where: {
+					id: id,
+					balance: { [Op.gte]: -amount } // Ensure balance will not go below zero
+				}
+			}
+		);
+
+		if (result[0] > 0) {
+			// result[0] is the number of affected rows
+			res.send({ message: "Balance updated successfully." });
 		} else {
-			await transaction.rollback();
-			res.status(400).send("Insufficient balance");
+			res.status(400).send("Insufficient balance or user not found.");
 		}
 	} catch (error) {
-		await transaction.rollback();
-		if (error instanceof Error) {
-			res.status(500).send(error.message);
-		} else {
-			res.status(500).send("An unexpected error occurred");
-		}
+		console.error("Update error:", error);
+		res.status(500).send("An unexpected error occurred.");
 	}
 });
+
+export default app;
 
 const run = async () => {
 	await up();
