@@ -3,6 +3,6 @@ import { getAllTasks } from "../controllers/tasksController.js";
 
 const router = Router();
 
-router.post("/status", getAllTasks);
+router.get("/status", getAllTasks);
 
 export default router;

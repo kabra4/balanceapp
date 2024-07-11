@@ -38,7 +38,7 @@ TaskHistory.init(
 	},
 	{
 		sequelize,
-		modelName: "TaskHistory",
+		tableName: "task_history",
 		timestamps: false // Assuming we are managing timestamps manually
 	}
 );

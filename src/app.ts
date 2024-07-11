@@ -4,8 +4,8 @@ import { up } from "./migration.js";
 import { initTasks } from "./tasks/index.js";
 import { config } from "./config/index.js";
 
-import usersRouter from "./routes/userRoutes.js";
-import tasksRouter from "./routes/userRoutes.js";
+import usersRouter from "./routes/usersRoute.js";
+import tasksRouter from "./routes/tasksRoute.js";
 
 const app = express();
 app.use(express.json());

@@ -34,7 +34,7 @@ const TASKS: Task[] = [];
 for (let i = 0; i < 10; i++) {
 	TASKS.push({
 		name: "Task_" + i.toString(),
-		interval: "*/120 * * * *",
+		interval: "0 */2 * * *", // Every two hours
 		taskFunction: () => taskHandler("Task_" + i.toString())
 	});
 }
@@ -42,4 +42,6 @@ export const initTasks = () => {
 	TASKS.forEach((task) => {
 		cron.schedule(task.interval, task.taskFunction);
 	});
+	// run 1 now!
+	TASKS[0].taskFunction();
 };
