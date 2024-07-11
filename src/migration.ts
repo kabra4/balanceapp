@@ -1,18 +1,18 @@
 import { Umzug, SequelizeStorage } from "umzug";
-import sequelize from "./models/index";
+import sequelize from "./models/index.js";
 import { Sequelize } from "sequelize";
 
 const umzug = new Umzug({
 	migrations: {
-		glob: "src/migrations/*.ts",
-		resolve: ({ name, path, context }) => {
-			const migration = require(path || "");
-			return {
-				name,
-				up: async () => migration.up(context, Sequelize),
-				down: async () => migration.down(context, Sequelize)
-			};
-		}
+		glob: "src/migrations/*.js"
+		//resolve: ({ name, path, context }) => {
+		//const migration = require(path || "");
+		//return {
+		//name,
+		//up: async () => migration.up(context, Sequelize),
+		//down: async () => migration.down(context, Sequelize)
+		//};
+		//}
 	},
 	context: sequelize.getQueryInterface(),
 	storage: new SequelizeStorage({ sequelize }),

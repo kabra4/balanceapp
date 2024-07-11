@@ -1,6 +1,6 @@
 import request from "supertest";
-import app from "./app"; // Import the Express application
-import { User } from "./models/User";
+import app from "./app.js"; // Import the Express application
+import { User } from "./models/User.js";
 
 const runTestRequests = async () => {
 	const results = [];

@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import os from "os";
 dotenv.config();
 
 const requiredEnv = (key: string) => {
@@ -13,5 +14,6 @@ export const config = {
 	dbPassword: requiredEnv("DB_PASSWORD"),
 	dbHost: requiredEnv("DB_HOST"),
 	dbPort: Number(requiredEnv("DB_PORT")),
-	dbName: requiredEnv("DATABASE")
+	dbName: requiredEnv("DATABASE"),
+	hostname: os.hostname()
 };

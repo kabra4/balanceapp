@@ -1,10 +1,13 @@
 {
 	"name": "balanceapp",
 	"version": "1.0.0",
+	"type": "module",
 	"description": "test app for the job vacancy",
-	"main": "index.js",
+	"exports": "./index.js",
 	"scripts": {
-		"test": "jest"
+		"test": "jest",
+		"start": "node dist/app.js",
+		"build": "tsc"
 	},
 	"author": "",
 	"license": "ISC",
@@ -18,6 +21,8 @@
 	"dependencies": {
 		"dotenv": "^16.4.5",
 		"express": "^4.19.2",
+		"ioredis": "^5.4.1",
+		"node-cron": "^3.0.3",
 		"pg": "^8.12.0",
 		"pg-hstore": "^2.3.4",
 		"sequelize": "^6.37.3",
@@ -27,12 +32,14 @@
 		"@types/express": "^4.17.21",
 		"@types/jest": "^29.5.12",
 		"@types/node": "^20.14.10",
+		"@types/node-cron": "^3.0.11",
 		"@types/supertest": "^6.0.2",
 		"jest": "^29.7.0",
 		"sequelize-cli": "^6.6.2",
 		"supertest": "^7.0.0",
 		"ts-jest": "^29.1.5",
 		"ts-node": "^10.9.2",
+		"tsx": "^4.16.2",
 		"typescript": "^5.5.3"
 	}
 }
