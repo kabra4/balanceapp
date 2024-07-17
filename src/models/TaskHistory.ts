@@ -2,14 +2,13 @@ import { Sequelize, Model, DataTypes } from "sequelize";
 import sequelize from "./index.js";
 
 export class TaskHistory extends Model {
-	//public id!: number;
-	//public taskName!: string;
-	//public serverId!: string;
-	//public startTime!: string;
-}
-export class User extends Model {
 	public id!: number;
-	public balance!: number;
+	public taskName!: string;
+	public serverId!: string;
+	public startTime!: string;
+	public endTime!: string;
+	public schedule!: string;
+	public status!: string;
 }
 
 TaskHistory.init(
@@ -21,25 +20,35 @@ TaskHistory.init(
 		},
 		taskName: {
 			type: DataTypes.STRING,
-			allowNull: false
+			allowNull: false,
+			unique: true
 		},
 		serverId: {
 			type: DataTypes.STRING,
-			allowNull: false
+			allowNull: true
 		},
 		startTime: {
 			type: DataTypes.DATE,
-			allowNull: false
+			allowNull: true
 		},
 		endTime: {
 			type: DataTypes.DATE,
+			allowNull: true
+		},
+		schedule: {
+			type: DataTypes.STRING,
 			allowNull: false
+		},
+		status: {
+			type: DataTypes.ENUM("Pending", "In progress", "Finished"),
+			allowNull: false,
+			defaultValue: "Pending" // Default status is 'Pending'
 		}
 	},
 	{
 		sequelize,
 		tableName: "task_history",
-		timestamps: false // Assuming we are managing timestamps manually
+		timestamps: false
 	}
 );
 

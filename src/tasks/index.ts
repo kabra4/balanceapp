@@ -1,47 +1,67 @@
-import { redis } from "../config/redis.js";
 import cron from "node-cron";
 import { config } from "../config/index.js";
 import TaskHistory from "../models/TaskHistory.js";
 
+// Set to track currently scheduled tasks
+let scheduledTasks = new Set<string>();
+
+// Task handler function to manage task execution based on database status
 async function taskHandler(taskName: string) {
-	const lock = await redis.set(`${taskName}_lock`, "locked", "EX", 120, "NX");
-	if (lock) {
-		const startTime = new Date();
+	const taskRecord = await TaskHistory.findOne({
+		where: {
+			taskName,
+			status: "Pending"
+		}
+	});
+
+	if (taskRecord) {
+		await taskRecord.update({
+			status: "In Progress",
+			startTime: new Date()
+		});
+
 		console.log(`${taskName} is running on ${config.hostname}`);
 
-		// simulating long task
+		// Simulate a long task
 		await new Promise((resolve) => setTimeout(resolve, 2 * 60 * 1000)); // 2 minutes
+
 		console.log(`${taskName} completed`);
-		await TaskHistory.create({
-			taskName,
-			serverId: config.hostname,
-			startTime,
+		await taskRecord.update({
+			status: "Finished",
 			endTime: new Date()
 		});
-		await redis.del(`${taskName}_lock`);
+	} else {
+		console.log(`Skipping ${taskName}, as it is already in progress or finished.`);
 	}
 }
 
-type Task = {
-	name: string;
-	interval: string;
-	taskFunction: () => {};
+// Initialize tasks and dynamically schedule them based on their interval from the database
+export const initTasks = async () => {
+	const tasks = await TaskHistory.findAll();
+	tasks.forEach((task) => {
+		if (!scheduledTasks.has(task.taskName)) {
+			cron.schedule(task.schedule, () => taskHandler(task.taskName), {
+				scheduled: true
+			});
+			scheduledTasks.add(task.taskName);
+			console.log(`Scheduled task: ${task.taskName} to run at interval: ${task.schedule}`);
+		}
+	});
 };
 
-const TASKS: Task[] = [];
-
-// generating tasks for test purposes
-for (let i = 0; i < 10; i++) {
-	TASKS.push({
-		name: "Task_" + i.toString(),
-		interval: "0 */2 * * *", // Every two hours
-		taskFunction: () => taskHandler("Task_" + i.toString())
+// Function to check and initiate tasks if they are not currently scheduled
+async function checkAndRunTasks() {
+	const tasksToRun = await TaskHistory.findAll();
+	tasksToRun.forEach((task) => {
+		if (!scheduledTasks.has(task.taskName)) {
+			cron.schedule(task.schedule, () => taskHandler(task.taskName), {
+				scheduled: true
+			});
+			scheduledTasks.add(task.taskName);
+			console.log(`Scheduled new task: ${task.taskName} at interval: ${task.schedule}`);
+		}
 	});
 }
-export const initTasks = () => {
-	TASKS.forEach((task) => {
-		cron.schedule(task.interval, task.taskFunction);
-	});
-	// run 1 now!
-	TASKS[0].taskFunction();
-};
+
+// Start the check for new tasks every minute
+cron.schedule("* * * * *", () => checkAndRunTasks());
